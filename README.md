@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project is a tool for saving your starred posts in PKU Treehole, including posts, images and comments, and saves the data in original JSON and Markdown formats (with image links and quote links) for easy viewing.
+This project is for saving your starred posts in PKU Treehole, including posts, images and comments, and saves the data in original JSON and Markdown formats (with image links and quote links) for easy viewing.
 
 > [!NOTE]
 > This project is not affiliated with Peking University nor the Peking University Youth Research Center.
@@ -20,7 +20,7 @@ Copy `config.py` to `config_private.py` and enter your username and password in 
 > [!WARNING]
 > For security reasons, it is recommended to keep your credentials in `config_private.py` (which is ignored by version control) rather than `config.py`, especially if you plan to share your code. However, if you prefer, you can also fill in your credentials directly in `config.py`.
 
-Run the tool:
+Run the code:
 
 ```bash
 python main.py
@@ -28,7 +28,7 @@ python main.py
 
 ## Structure
 
-There will be three directories in the `data` directory after running the tool:
+There will be three directories in the `data` directory after running the code:
 
 ```
 .
@@ -38,11 +38,11 @@ There will be three directories in the `data` directory after running the tool:
     └── post_markdown
 ```
 
-The `image` directory will contain the teasers of the posts, named as `<pid>.<ext>`, where `pid` is the post ID and `ext` is the extension of the image, where the `pid` is zero-padded to 7 digits.
+- The `image` directory stores the images associated with posts. Each image is named as `<pid>.<ext>`, where `pid` is the post ID (zero-padded to 7 digits, e.g., `0000123.jpg`) and `ext` is the image file extension.
 
-The `post_json` directory will contain the JSON files of the **tasks**, each file is named as `<timestamp>.json` containing the original data of all the queried posts of this task (as one task may query a list of posts), where `timestamp` is the running timestamp of this task.
+- The `post_json` directory contains JSON files for each data collection task. Each file is named `<timestamp>.json`, where `timestamp` is the time the task was run. Each JSON file includes the original data for all posts retrieved in that task (since a single task may fetch multiple posts).
 
-The `post_markdown` directory will contain the Markdown files of the **posts**, each file is named as `<pid>.md` , where `pid` is the post ID, zero-padded to 7 digits. The markdown files has image links to the `image` directory and quote links when a comment quotes another comment.
+- The `post_markdown` directory holds the Markdown files for individual posts. Each file is named `<pid>.md`, with `pid` being the zero-padded post ID. These Markdown files include the time of this post and its comments, image links pointing to the `image` directory, and when a comment quotes another comment, a quote link is included for clarity.
 
 ## Notes
 
