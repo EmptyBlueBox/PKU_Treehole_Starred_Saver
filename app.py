@@ -11,20 +11,62 @@ except ImportError:
     from config import PASSWORD, USERNAME
 
 
+def format_time(t):
+    """
+    Convert a timestamp or string to a human-readable time string.
+
+    Args:
+        t (int|float|str): Timestamp (seconds) or time string.
+
+    Returns:
+        str: Formatted time string 'YYYY-MM-DD HH:MM:SS' or 'unknown'.
+    """
+    if t is None:
+        return "unknown"
+    if isinstance(t, (int, float)):
+        try:
+            return datetime.datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S")
+        except Exception:
+            return "unknown"
+    if isinstance(t, str):
+        # Try to parse string to datetime, else return as is
+        try:
+            # Try common formats
+            for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y/%m/%d %H:%M:%S"):
+                try:
+                    dt = datetime.datetime.strptime(t, fmt)
+                    return dt.strftime("%Y-%m-%d %H:%M:%S")
+                except Exception:
+                    continue
+            return t
+        except Exception:
+            return "unknown"
+    return "unknown"
+
+
 class App:
     def __init__(self):
         self.client = Client()
         self.executor = ThreadPoolExecutor(max_workers=20)
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
-        if not os.path.exists(os.path.join(self.current_dir, "data", "download")):
-            os.makedirs(os.path.join(self.current_dir, "data", "download"))
+        # Ensure required directories exist
+        self.data_dir = os.path.join(self.current_dir, "data")
+        self.image_dir = os.path.join(self.data_dir, "image")
+        self.post_json_dir = os.path.join(self.data_dir, "post_json")
+        self.post_markdown_dir = os.path.join(self.data_dir, "post_markdown")
+        for d in [
+            self.image_dir,
+            self.post_json_dir,
+            self.post_markdown_dir,
+        ]:
+            if not os.path.exists(d):
+                os.makedirs(d)
 
         response = self.client.un_read()
         while response.status_code != 200:
             print(
                 f"{response.status_code}: Need to login, use config_private.py first, if not available, use config.py"
             )
-
             # Use credentials from config.py
             username = USERNAME
             password = PASSWORD
@@ -45,17 +87,25 @@ class App:
             response = self.client.un_read()
 
     def get_one_post_and_all_comments(self, post_id):
+        """
+        Fetch a single post and all its comments. If the post is an image, download the image to the image directory.
+
+        Args:
+            post_id (int): The ID of the post to fetch.
+
+        Returns:
+            tuple: (post (dict), comments (list of dict))
+        """
         post = self.client.get_post(post_id)
+        image_filename = None
         if post["success"]:
             post = post["data"]
             if post["type"] == "image":
                 image_type = post["url"].split(".")[-1]
-                self.client.get_image(
-                    post_id,
-                    os.path.join(self.current_dir, "data", "download", post_id)
-                    + "."
-                    + image_type,
-                )
+                image_filename = f"{post_id}.{image_type}"
+                image_path = os.path.join(self.image_dir, image_filename)
+                self.client.get_image(post_id, image_path)
+                post["image_filename"] = image_filename  # Add for markdown reference
             comments = self.client.get_comment(post_id)["data"]
 
             if comments:
@@ -72,7 +122,7 @@ class App:
 
     def get_and_save_post_list(self, posts):
         """
-        Fetch posts and their comments concurrently and save them to a JSON file with proper UTF-8 encoding.
+        Fetch posts and their comments concurrently, save to a JSON file, and generate Markdown files for each post.
 
         Args:
             posts (list of int): List of post IDs to fetch.
@@ -90,17 +140,52 @@ class App:
         for future in futures:
             post, comments = future.result()
             posts_data.append({"post": post, "comments": comments})
+        # Save JSON to post_json directory
         data_name = (
             os.path.join(
-                self.current_dir,
-                "data",
+                self.post_json_dir,
                 datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
             )
             + ".json"
         )
-        # Save with UTF-8 encoding and ensure_ascii=False to properly store Chinese characters
         with open(data_name, "w", encoding="utf-8") as file:
             json.dump(posts_data, file, indent=4, ensure_ascii=False)
+        # Save each post as a Markdown file
+        for item in posts_data:
+            post = item["post"]
+            comments = item["comments"]
+            pid = post.get("pid", "unknown")
+            post_time = format_time(post.get("timestamp"))
+            md_lines = [f"# Post {pid}\n"]
+            md_lines.append(f"[{post_time}]\n")
+            # Duplicate every newline in the post text to ensure Markdown renders blank lines (i.e., visible line breaks).
+            post_text = post.get("text", "")
+            post_text_with_double_newlines = post_text.replace("\n", "\n")
+            md_lines.append(post_text_with_double_newlines)
+            # If image, add image reference
+            if post.get("type") == "image" and post.get("image_filename"):
+                # Use relative path from markdown to image folder
+                image_rel_path = f"../image/{post['image_filename']}"
+                md_lines.append(f"\n![]({image_rel_path})")
+            md_lines.append("\n## Comments\n")
+            if comments:
+                for c in comments:
+                    name = c.get("name", "Anonymous")
+                    text = c.get("text", "")
+                    c_time = format_time(c.get("timestamp"))
+                    quote = c.get("quote")
+                    if quote:
+                        quote_name = quote.get("name_tag", "Anonymous")
+                        quote_text = quote.get("text", "")
+                        md_lines.append(f"> {quote_name}: {quote_text}\n")
+                    md_lines.append(f"{name} [{c_time}]: {text}")
+                    md_lines.append("\n---\n")
+            else:
+                md_lines.append("No comments.")
+            md_content = "\n".join(md_lines)
+            md_filename = os.path.join(self.post_markdown_dir, f"{pid}.md")
+            with open(md_filename, "w", encoding="utf-8") as f:
+                f.write(md_content)
 
     def get_and_save_followed_posts(self):
         followed_posts = self.client.get_followed()
@@ -120,4 +205,4 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    app.get_and_save_followed_posts()
+    app.get_and_save_post_list([7541521, 7542104])
