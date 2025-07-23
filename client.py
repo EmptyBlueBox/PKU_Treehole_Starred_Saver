@@ -118,6 +118,28 @@ class Client:
                 for chunk in response.iter_content(1024):
                     file.write(chunk)
 
+    def get_followed(self, page=1, limit=25):
+        """
+        Query the followed/starred posts list in a format similar to gqt_comment.
+
+        Args:
+            page (int): Page number, starting from 1 (default: 1)
+            limit (int): Number of posts per page (default: 25)
+
+        Returns:
+            dict: A dictionary containing:
+                - code (int): Status code, 0 for success
+                - msg (str): Message, "ok" if successful
+                - data (dict): Contains:
+                    - count (int): Total number of followed posts
+                    - posts (list of dict): List of followed post objects
+        """
+        url = "https://treehole.pku.edu.cn/api/follow_v2"
+        params = {"page": page, "limit": limit}
+        response = self.session.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
+
     def save_cookies(self):
         cookies_list = []
         for cookie in self.session.cookies:
