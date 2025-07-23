@@ -4,6 +4,8 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+from tqdm import tqdm
+
 from client import Client
 
 try:
@@ -150,7 +152,7 @@ class App:
         """
         posts_data = []
         futures = []
-        for idx, post_id in enumerate(posts):
+        for idx, post_id in tqdm(enumerate(posts), desc="Submitting tasks", unit="post"):
             if idx != 0:
                 time.sleep(0.5)  # Limit to 2 requests per second
             futures.append(
@@ -158,7 +160,7 @@ class App:
                     lambda post_id=post_id: self.get_one_post_and_all_comments(post_id)
                 )
             )
-        for future in futures:
+        for future in tqdm(futures, desc="Fetching results", unit="post"):
             post, comments = future.result()
             posts_data.append({"post": post, "comments": comments})
         # Save JSON to post_json directory
@@ -235,4 +237,4 @@ class App:
 if __name__ == "__main__":
     # Example usage: fetch and save several posts by ID
     app = App()
-    app.get_and_save_post_list([53562, 7541521, 7542104])
+    app.get_and_save_followed_posts()
