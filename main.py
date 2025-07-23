@@ -152,7 +152,9 @@ class App:
         """
         posts_data = []
         futures = []
-        for idx, post_id in tqdm(enumerate(posts), desc="Submitting tasks", unit="post"):
+        for idx, post_id in enumerate(
+            tqdm(posts, desc="Submitting tasks", unit="post")
+        ):
             if idx != 0:
                 time.sleep(0.5)  # Limit to 2 requests per second
             futures.append(
