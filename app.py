@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor
+import time
 
 from client import Client
 
@@ -130,14 +131,19 @@ class App:
 
         Returns:
             None
+        Note:
+            The rate of post access is limited to 2 per second (0.5s interval between requests).
         """
         posts_data = []
-        futures = [
-            self.executor.submit(
-                lambda post_id=post_id: self.get_one_post_and_all_comments(post_id)
+        futures = []
+        for idx, post_id in enumerate(posts):
+            if idx != 0:
+                time.sleep(0.5)  # Limit to 2 requests per second
+            futures.append(
+                self.executor.submit(
+                    lambda post_id=post_id: self.get_one_post_and_all_comments(post_id)
+                )
             )
-            for post_id in posts
-        ]
         for future in futures:
             post, comments = future.result()
             posts_data.append({"post": post, "comments": comments})
