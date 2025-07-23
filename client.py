@@ -9,6 +9,10 @@ import requests
 
 
 class TreeHoleWeb(enum.Enum):
+    """
+    Enum for Treehole web API endpoints.
+    """
+
     OAUTH_LOGIN = "https://iaaa.pku.edu.cn/iaaa/oauthlogin.do"
     REDIR_URL = "https://treehole.pku.edu.cn/cas_iaaa_login?uuid=fc71db5799cf&plat=web"
     SSO_LOGIN = "http://treehole.pku.edu.cn/cas_iaaa_login"
@@ -19,7 +23,15 @@ class TreeHoleWeb(enum.Enum):
 
 
 class Client:
+    """
+    Client for interacting with the PKU Treehole API.
+    Handles authentication, post/comment/image retrieval, and cookie management.
+    """
+
     def __init__(self):
+        """
+        Initialize the client, set headers, and load cookies if available.
+        """
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -27,6 +39,7 @@ class Client:
             }
         )
         self.load_cookies()
+        # If token exists in cookies, set authorization header
         if "pku_token" in self.session.cookies.keys():
             self.authorization = self.session.cookies.values()[
                 self.session.cookies.keys().index("pku_token")
@@ -36,6 +49,16 @@ class Client:
             )
 
     def oauth_login(self, username, password):
+        """
+        Perform OAuth login with username and password.
+
+        Args:
+            username (str): Username for login.
+            password (str): Password for login.
+
+        Returns:
+            dict: JSON response from the server.
+        """
         response = self.session.post(
             TreeHoleWeb.OAUTH_LOGIN.value,
             data={
@@ -52,6 +75,15 @@ class Client:
         return response.json()
 
     def sso_login(self, token):
+        """
+        Perform SSO login using a token.
+
+        Args:
+            token (str): Token for SSO login.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
         rand = str(random.random())
         response = self.session.get(
             TreeHoleWeb.SSO_LOGIN.value,
@@ -64,18 +96,32 @@ class Client:
         )
         response.raise_for_status()
         print(response.status_code, response.headers)
-
+        # Extract token from URL and update session
         self.authorization = re.search(r"token=(.*)", response.url).group(1)
         self.session.cookies.update({"pku_token": self.authorization})
         self.session.headers.update({"authorization": f"Bearer {self.authorization}"})
         return response
 
     def un_read(self):
-        response = self.session.get(TreeHoleWeb.UN_READ.value)
+        """
+        Get unread messages status.
 
+        Returns:
+            requests.Response: The HTTP response object.
+        """
+        response = self.session.get(TreeHoleWeb.UN_READ.value)
         return response
 
     def login_by_token(self, token):
+        """
+        Login using a token (e.g., from mobile app).
+
+        Args:
+            token (str): Token for login.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
         response = self.session.post(
             TreeHoleWeb.LOGIN_BY_TOKEN.value, data={"token": token}
         )
@@ -84,6 +130,15 @@ class Client:
         return response
 
     def login_by_message(self, code):
+        """
+        Login using a message code (SMS verification).
+
+        Args:
+            code (str): SMS verification code.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
         response = self.session.post(
             TreeHoleWeb.LOGIN_BY_MESSAGE.value, data={"valid_code": code}
         )
@@ -92,16 +147,43 @@ class Client:
         return response
 
     def send_message(self):
+        """
+        Send an SMS message for verification.
+
+        Returns:
+            requests.Response: The HTTP response object.
+        """
         response = self.session.post(TreeHoleWeb.SEND_MESSAGE.value)
         response.raise_for_status()
         return response
 
     def get_post(self, post_id):
+        """
+        Get a post by its ID.
+
+        Args:
+            post_id (int): The post ID.
+
+        Returns:
+            dict: JSON response containing the post data.
+        """
         response = self.session.get(f"https://treehole.pku.edu.cn/api/pku/{post_id}")
         response.raise_for_status()
         return response.json()
 
     def get_comment(self, post_id, page=1, limit=15, sort="asc"):
+        """
+        Get comments for a post.
+
+        Args:
+            post_id (int): The post ID.
+            page (int): Page number (default: 1).
+            limit (int): Number of comments per page (default: 15).
+            sort (str): Sort order, 'asc' or 'desc' (default: 'asc').
+
+        Returns:
+            dict: JSON response containing the comments data.
+        """
         response = self.session.get(
             f"https://treehole.pku.edu.cn/api/pku_comment_v3/{post_id}",
             params={"page": page, "limit": limit, "sort": sort},
@@ -110,6 +192,16 @@ class Client:
         return response.json()
 
     def get_image(self, post_id, file_name):
+        """
+        Download an image for a post.
+
+        Args:
+            post_id (int): The post ID.
+            file_name (str): The file path to save the image.
+
+        Returns:
+            None
+        """
         response = self.session.get(
             f"https://treehole.pku.edu.cn/api/pku_image/{post_id}", stream=True
         )
@@ -120,19 +212,14 @@ class Client:
 
     def get_followed(self, page=1, limit=25):
         """
-        Query the followed/starred posts list in a format similar to gqt_comment.
+        Query the followed/starred posts list.
 
         Args:
             page (int): Page number, starting from 1 (default: 1)
             limit (int): Number of posts per page (default: 25)
 
         Returns:
-            dict: A dictionary containing:
-                - code (int): Status code, 0 for success
-                - msg (str): Message, "ok" if successful
-                - data (dict): Contains:
-                    - count (int): Total number of followed posts
-                    - posts (list of dict): List of followed post objects
+            dict: JSON response containing followed posts data.
         """
         url = "https://treehole.pku.edu.cn/api/follow_v2"
         params = {"page": page, "limit": limit}
@@ -141,6 +228,9 @@ class Client:
         return response.json()
 
     def save_cookies(self):
+        """
+        Save session cookies to a file (cookies.json).
+        """
         cookies_list = []
         for cookie in self.session.cookies:
             cookie_dict = {
@@ -158,6 +248,9 @@ class Client:
             json.dump(cookies_list, f, indent=4)
 
     def load_cookies(self):
+        """
+        Load session cookies from a file (cookies.json), if available.
+        """
         try:
             with open("cookies.json", "r") as f:
                 cookies_list = json.load(f)
@@ -187,14 +280,15 @@ class Client:
             print(e)
 
 
+# The following block is for manual testing and demonstration purposes only.
+# It is commented out to avoid accidental execution.
 """
 if __name__ == "__main__":
     import getpass
     client = Client()
     response = client.un_read()
     if response.status_code != 200:
-        print(f"{response.status_code}: 需要登录")
-        
+        print(f"{response.status_code}: Login required")
         username = input('username: ')
         password = getpass.getpass('password: ')
         data = client.oauth_login(username, password)
@@ -202,18 +296,16 @@ if __name__ == "__main__":
         print(token)
         client.sso_login(token)
         response = client.un_read()
-        
     else:
         if response.json()["message"] == "请手机短信验证":
-            tmp = input("发送验证码(Y/n)：")
+            tmp = input("Send verification code (Y/n): ")
             if tmp == 'Y':
                 client.send_message()
-                code = input("短信验证码：")
+                code = input("SMS verification code: ")
                 client.login_by_message(code)
         elif response.json()["message"] == "请进行令牌验证":
-            token = input("手机令牌：")
+            token = input("Mobile token: ")
             client.login_by_token(token)
-
     while True:
         key = input("key (q to quit): ")
         if key == 'q':

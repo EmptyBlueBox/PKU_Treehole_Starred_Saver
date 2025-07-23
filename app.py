@@ -1,8 +1,8 @@
 import datetime
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from client import Client
 
@@ -46,7 +46,15 @@ def format_time(t):
 
 
 class App:
+    """
+    Main application class for crawling and saving PKU Treehole posts and comments.
+    Handles authentication, data fetching, and saving in JSON/Markdown formats.
+    """
+
     def __init__(self):
+        """
+        Initialize the App, set up directories, and ensure authentication.
+        """
         self.client = Client()
         self.executor = ThreadPoolExecutor(max_workers=20)
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -63,6 +71,7 @@ class App:
             if not os.path.exists(d):
                 os.makedirs(d)
 
+        # Try to get unread status, if not logged in, perform login
         response = self.client.un_read()
         while response.status_code != 200:
             print(
@@ -75,15 +84,16 @@ class App:
             self.client.sso_login(token)
             response = self.client.un_read()
 
+        # Handle additional authentication (SMS or token) if required
         while not response.json()["success"]:
             if response.json()["message"] == "请手机短信验证":
-                tmp = input("发送验证码(Y/n)：")
+                tmp = input("Send verification code (Y/n): ")
                 if tmp == "Y":
                     self.client.send_message()
-                    code = input("短信验证码：")
+                    code = input("SMS verification code: ")
                     self.client.login_by_message(code)
             elif response.json()["message"] == "请进行令牌验证":
-                token = input("手机令牌：")
+                token = input("Mobile token: ")
                 self.client.login_by_token(token)
             response = self.client.un_read()
 
@@ -120,7 +130,11 @@ class App:
                 comments = []
             return post, comments
         else:
-            return {"pid": post_id, "text": "您查看的树洞不存在", "type": "text"}, []
+            return {
+                "pid": post_id,
+                "text": "The post you are viewing does not exist",
+                "type": "text",
+            }, []
 
     def get_and_save_post_list(self, posts):
         """
@@ -200,6 +214,9 @@ class App:
                 f.write(md_content)
 
     def get_and_save_followed_posts(self):
+        """
+        Fetch all followed posts and save them using get_and_save_post_list.
+        """
         followed_posts = self.client.get_followed()
         if followed_posts["success"]:
             last_page = followed_posts["data"]["last_page"]
@@ -216,5 +233,6 @@ class App:
 
 
 if __name__ == "__main__":
+    # Example usage: fetch and save several posts by ID
     app = App()
     app.get_and_save_post_list([53562, 7541521, 7542104])
