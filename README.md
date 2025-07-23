@@ -9,6 +9,13 @@ This project is for saving your starred posts in PKU Treehole, including posts, 
 
 ## Usage
 
+Clone the repository:
+
+```bash
+git clone git@github.com:EmptyBlueBox/PKU_Treehole_Starred_Saver.git
+cd PKU_Treehole_Starred_Saver
+```
+
 Install dependencies with [uv](https://docs.astral.sh/uv/) :
 
 ```bash
