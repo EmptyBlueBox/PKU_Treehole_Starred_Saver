@@ -4,6 +4,11 @@
 
 PKU Treehole Crawler is a web scraper project for crawling your starred posts in PKU Treehole (Peking University Treehole).
 
+
+
+> [!NOTE]
+> This project is not affiliated with Peking University nor the Peking University Youth Research Center.
+
 ## Usage
 
 Install dependencies
@@ -35,3 +40,7 @@ The `get_and_save_followed_posts` function is used to crawl your starred posts a
 ## Rate limit
 
 The `get_and_save_post_list` function is restricted to 2 requests per second to avoid being blocked by the server.
+
+## Acknowledgments
+
+This project refers to and utilizes code from [PKU Treehole Crawler](https://github.com/dfshfghj/PKUHoleCrawler-new). Many thanks to the original author!
