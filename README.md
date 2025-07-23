@@ -9,7 +9,7 @@ This project is a tool for saving your starred posts in PKU Treehole, including 
 
 ## Usage
 
-Install dependencies with [uv](https://docs.astral.sh/uv/):
+Install dependencies with [uv](https://docs.astral.sh/uv/) :
 
 ```bash
 uv sync
