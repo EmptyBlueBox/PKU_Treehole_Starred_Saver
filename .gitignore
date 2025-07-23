@@ -3,3 +3,6 @@
 
 # Python
 __pycache__/
+
+# Private config
+config_private.py

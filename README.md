@@ -12,6 +12,12 @@ Install dependencies
 uv sync
 ```
 
+Copy `config.py` to `config_private.py` and fill in your username and password.
+
+```bash
+cp config.py config_private.py
+```
+
 Run the crawler
 
 ```bash

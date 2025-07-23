@@ -1,10 +1,14 @@
 import datetime
-import getpass
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor
 
 from client import Client
+
+try:
+    from config_private import PASSWORD, USERNAME
+except ImportError:
+    from config import PASSWORD, USERNAME
 
 
 class App:
@@ -17,10 +21,13 @@ class App:
 
         response = self.client.un_read()
         while response.status_code != 200:
-            print(f"{response.status_code}: 需要登录")
+            print(
+                f"{response.status_code}: Need to login, use config_private.py first, if not available, use config.py"
+            )
 
-            username = input("username: ")
-            password = getpass.getpass("password: ")
+            # Use credentials from config.py
+            username = USERNAME
+            password = PASSWORD
             token = self.client.oauth_login(username, password)["token"]
             self.client.sso_login(token)
             response = self.client.un_read()
