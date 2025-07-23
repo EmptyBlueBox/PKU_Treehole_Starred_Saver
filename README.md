@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project is a web scraper for crawling your starred posts in PKU Treehole, including posts, images and comments, and saves the data in original JSON and Markdown formats (with image links and quote links) for easy viewing.
+This project is a tool for saving your starred posts in PKU Treehole, including posts, images and comments, and saves the data in original JSON and Markdown formats (with image links and quote links) for easy viewing.
 
 > [!NOTE]
 > This project is not affiliated with Peking University nor the Peking University Youth Research Center.
