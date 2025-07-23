@@ -1,7 +1,7 @@
 [project]
-name = "pkutreeholecrawler"
+name = "pkutreeholestarredsaver"
 version = "0.1.0"
-description = "PKU Treehole Crawler"
+description = "PKU Treehole Starred Saver"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
