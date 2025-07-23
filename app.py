@@ -44,20 +44,7 @@ class App:
                 self.client.login_by_token(token)
             response = self.client.un_read()
 
-    def read(self, post_id):
-        post = self.client.get_post(post_id)
-        if post["success"]:
-            post = post["data"]
-
-            reply = post["reply"]
-            likenum = post["likenum"]
-            text = post["text"]
-            print(f"{post_id}  reply:{reply} likenum:{likenum}")
-            print(text)
-        else:
-            print(f"{post_id}: {post["message"]}")
-
-    def get_post(self, post_id):
+    def get_one_post_and_all_comments(self, post_id):
         post = self.client.get_post(post_id)
         if post["success"]:
             post = post["data"]
@@ -83,7 +70,7 @@ class App:
         else:
             return {"pid": post_id, "text": "您查看的树洞不存在", "type": "text"}, []
 
-    def get_posts(self, posts):
+    def get_and_save_post_list(self, posts):
         """
         Fetch posts and their comments concurrently and save them to a JSON file with proper UTF-8 encoding.
 
@@ -95,7 +82,9 @@ class App:
         """
         posts_data = []
         futures = [
-            self.executor.submit(lambda post_id=post_id: self.get_post(post_id))
+            self.executor.submit(
+                lambda post_id=post_id: self.get_one_post_and_all_comments(post_id)
+            )
             for post_id in posts
         ]
         for future in futures:
@@ -113,9 +102,22 @@ class App:
         with open(data_name, "w", encoding="utf-8") as file:
             json.dump(posts_data, file, indent=4, ensure_ascii=False)
 
+    def get_and_save_followed_posts(self):
+        followed_posts = self.client.get_followed()
+        if followed_posts["success"]:
+            last_page = followed_posts["data"]["last_page"]
+            posts = [post["pid"] for post in followed_posts["data"]["data"]]
+            for page in range(2, last_page + 1):
+                followed_posts = self.client.get_followed(page=page)
+                if followed_posts["success"]:
+                    posts += [post["pid"] for post in followed_posts["data"]["data"]]
+                else:
+                    print(followed_posts["message"])
+            self.get_and_save_post_list(posts)
+        else:
+            print(followed_posts["message"])
+
 
 if __name__ == "__main__":
     app = App()
-    while True:
-        post_id = input("post id: ")
-        app.get_posts([post_id])
+    app.get_and_save_followed_posts()
