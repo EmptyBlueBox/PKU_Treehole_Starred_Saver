@@ -102,7 +102,8 @@ class App:
             post = post["data"]
             if post["type"] == "image":
                 image_type = post["url"].split(".")[-1]
-                image_filename = f"{post_id}.{image_type}"
+                padded_pid = str(post_id).zfill(7)
+                image_filename = f"{padded_pid}.{image_type}"
                 image_path = os.path.join(self.image_dir, image_filename)
                 self.client.get_image(post_id, image_path)
                 post["image_filename"] = image_filename  # Add for markdown reference
@@ -155,6 +156,11 @@ class App:
             post = item["post"]
             comments = item["comments"]
             pid = post.get("pid", "unknown")
+            padded_pid = (
+                str(pid).zfill(7)
+                if isinstance(pid, int) or (isinstance(pid, str) and pid.isdigit())
+                else pid
+            )
             post_time = format_time(post.get("timestamp"))
             md_lines = [f"# Post {pid}\n"]
             md_lines.append(f"[{post_time}]\n")
@@ -183,7 +189,7 @@ class App:
             else:
                 md_lines.append("No comments.")
             md_content = "\n".join(md_lines)
-            md_filename = os.path.join(self.post_markdown_dir, f"{pid}.md")
+            md_filename = os.path.join(self.post_markdown_dir, f"{padded_pid}.md")
             with open(md_filename, "w", encoding="utf-8") as f:
                 f.write(md_content)
 
@@ -205,4 +211,4 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    app.get_and_save_post_list([7541521, 7542104])
+    app.get_and_save_post_list([53562, 7541521, 7542104])
