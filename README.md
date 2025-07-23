@@ -20,7 +20,7 @@ Copy `config.py` to `config_private.py` and fill in your username and password.
 Run the tool:
 
 ```bash
-python app.py
+python main.py
 ```
 
 ## Notes
