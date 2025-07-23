@@ -1,0 +1,9 @@
+[project]
+name = "pkutreeholecrawler"
+version = "0.1.0"
+description = "PKU Treehole Crawler"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "requests>=2.32.4",
+]
