@@ -2,9 +2,7 @@
 
 ## Introduction
 
-PKU Treehole Crawler is a web scraper project for crawling your starred posts in PKU Treehole (Peking University Treehole).
-
-
+PKU Treehole Crawler is a web scraper project for crawling your starred posts in PKU Treehole, including posts, images and comments, and saves the data in original JSON and Markdown formats (with image links and quote links) for easy viewing.
 
 > [!NOTE]
 > This project is not affiliated with Peking University nor the Peking University Youth Research Center.
