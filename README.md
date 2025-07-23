@@ -27,7 +27,7 @@ python main.py
 
 ## To modify
 
-You can also use this project to get a single post or a list of posts, but you'll have to manually modify the `app.py` file.
+You can also use this project to get a single post or a list of posts, but you'll have to manually modify the `main.py` file.
 
 The `get_one_post_and_all_comments` function is used to get a single post and all its comments.
 
@@ -37,7 +37,7 @@ The `get_and_save_followed_posts` function is used to get your starred posts and
 
 ## Rate limit
 
-The `get_and_save_post_list` function is restricted to 2 requests per second to avoid being blocked by the server. If you want to get more posts, you may increase the time interval between requests of the thread pool in the `app.py` file.
+The `get_and_save_post_list` function is restricted to 2 requests per second to avoid being blocked by the server. If you want to get more posts, you may increase the time interval between requests of the thread pool in the `main.py` file.
 
 ## Acknowledgments
 
