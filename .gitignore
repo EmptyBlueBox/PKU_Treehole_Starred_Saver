@@ -6,3 +6,6 @@ __pycache__/
 
 # Private config
 config_private.py
+
+# Data
+data/

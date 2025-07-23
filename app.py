@@ -84,6 +84,15 @@ class App:
             return {"pid": post_id, "text": "您查看的树洞不存在", "type": "text"}, []
 
     def get_posts(self, posts):
+        """
+        Fetch posts and their comments concurrently and save them to a JSON file with proper UTF-8 encoding.
+
+        Args:
+            posts (list of int): List of post IDs to fetch.
+
+        Returns:
+            None
+        """
         posts_data = []
         futures = [
             self.executor.submit(lambda post_id=post_id: self.get_post(post_id))
@@ -100,12 +109,13 @@ class App:
             )
             + ".json"
         )
-        with open(data_name, "w") as file:
-            json.dump(posts_data, file, indent=4)
+        # Save with UTF-8 encoding and ensure_ascii=False to properly store Chinese characters
+        with open(data_name, "w", encoding="utf-8") as file:
+            json.dump(posts_data, file, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
     app = App()
     while True:
         post_id = input("post id: ")
-        app.read(post_id)
+        app.get_posts([post_id])
