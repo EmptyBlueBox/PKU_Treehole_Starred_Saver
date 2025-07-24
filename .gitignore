@@ -8,5 +8,5 @@ __pycache__/
 config_private.py
 
 # Data
-data/
-analysis/
+Data/
+Analysis/
