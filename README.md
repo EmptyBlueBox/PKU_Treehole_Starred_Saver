@@ -30,7 +30,7 @@ Copy `config.py` to `config_private.py` and enter your username and password in 
 Run the crawler code, and the image and json files will be saved in the `data` directory, as shown in the `Structure` section.
 
 ```bash
-python main.py
+python crawler.py
 ```
 
 Run the markdown converter code, and the markdown files will be saved in the `data/post_markdown` directory, as shown in the `Structure` section.
@@ -62,7 +62,7 @@ There will be three directories in the `data` directory after running the code:
 │       │   └── 7541521.md
 │       └── 2025-07-24-05-03-51
 │           └── 7508259.md
-├── main.py
+├── crawler.py
 ├── pyproject.toml
 ├── README.md
 ├── save_markdown.py
@@ -79,7 +79,7 @@ There will be three directories in the `data` directory after running the code:
 
 ### To modify
 
-You can also use this project to get a single post or a list of posts, but you'll have to manually modify the `main.py` file.
+You can also use this project to get a single post or a list of posts, but you'll have to manually modify the `crawler.py` file.
 
 The `get_one_post_and_all_comments` function is used to get a single post and all its comments.
 
@@ -89,7 +89,7 @@ The `get_and_save_followed_posts` function is used to get your starred posts and
 
 ### Rate limit
 
-The `get_and_save_post_list` function is restricted to 2 requests per second to avoid being blocked by the server. If you want to get more posts, you may increase the time interval between requests of the thread pool in the `main.py` file.
+The `get_and_save_post_list` function is restricted to 2 requests per second to avoid being blocked by the server. If you want to get more posts, you may increase the time interval between requests of the thread pool in the `crawler.py` file.
 
 ## Acknowledgments
 
