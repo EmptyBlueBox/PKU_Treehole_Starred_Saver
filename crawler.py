@@ -140,6 +140,7 @@ class App:
         """
         import threading
 
+        posts = list(set(posts))  # Deduplication, to avoid repeatedly crawling the same post
         posts_data = []
         # For rate analysis
         submit_timestamps = []  # When each request is submitted
