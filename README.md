@@ -105,11 +105,17 @@ The `get_and_save_post_list` function enforces two types of limits to balance ef
    - The token bucket ensures that even under high concurrency, the submission rate will not exceed this threshold. If the rate is exceeded, threads will wait until tokens become available.
    - Default: `MAX_SUBMITTED_REQUESTS_PER_SECOND = 10`.
 
-2. **Concurrency (Parallelism) Limit (Thread Pool):**
+2. **Concurrency Limit (Thread Pool):**
    - The maximum number of requests that can be processed simultaneously is controlled by the thread pool size, set by `MAX_PARALLEL_REQUESTS`.
    - This parameter determines how many threads can fetch posts and comments in parallel.
    - Increasing this value allows more requests to be in progress at the same time, but may increase local resource usage and risk overloading the server.
    - Default: `MAX_PARALLEL_REQUESTS = 10`.
+
+<img src="Image/rate_analysis.png" alt="Rate Analysis" style="width: 80%; height: auto; display: block; margin: 0 auto;" />
+<p style="text-align: center; font-style: italic; color: gray;">Rate analysis showing real-time submission and completion rates</p>
+
+<img src="Image/concurrency_analysis.png" alt="Concurrency Analysis" style="width: 80%; height: auto; display: block; margin: 0 auto;" />
+<p style="text-align: center; font-style: italic; color: gray;">Concurrency analysis showing the number of active threads over time</p>
 
 **How it works:**
 - Each thread in the pool must acquire a token from the token bucket before submitting a request. If no token is available, the thread waits, ensuring the submission rate never exceeds the configured limit.
@@ -125,7 +131,7 @@ The `get_and_save_post_list` function enforces two types of limits to balance ef
 - If you want to speed up data collection, you may increase these values. However, setting them too high may result in your requests being blocked by the server or overloading your local system.
 
 **Analysis and Monitoring:**
-- After each run, the code will print a detailed analysis of the actual submission rate and concurrency, and save time series plots in the `analysis` directory:
+- After each run, the code will print a detailed analysis of the actual submission rate and concurrency, and save time series plots in the `Analysis` directory:
   - `<timestamp>-rate_analysis.png`: Shows the real-time submission and completion rates.
   - `<timestamp>-concurrency_analysis.png`: Shows the number of active threads over time.
 - Use these plots to monitor the effect of your settings and avoid exceeding safe limits.
