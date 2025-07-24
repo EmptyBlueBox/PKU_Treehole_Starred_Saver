@@ -39,6 +39,8 @@ Run the markdown converter code, and the markdown files will be saved in the `Da
 python save_markdown.py --json Data/PostJson/202x-xx-xx-xx-xx-xx.json
 ```
 
+Then all of your posts will be saved in the `Data/PostMarkdown/202x-xx-xx-xx-xx-xx/` directory. Just compress this directory and take it anywhere on earth!
+
 ## Structure
 
 There will be three directories in the `Data` directory after running the code:
