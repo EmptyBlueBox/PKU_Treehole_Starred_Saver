@@ -121,6 +121,7 @@ if __name__ == "__main__":
     Main entry point for converting post JSON to Markdown files.
     Accepts --json argument for JSON file path (default: latest in Data/PostJson),
     then saves Markdown files to Data/PostMarkdown with absolute image paths.
+    Also copies the original JSON file to RawJson subdirectory.
     """
     import argparse
 
@@ -155,4 +156,15 @@ if __name__ == "__main__":
 
     print(f"Loaded {len(posts_data)} posts from {json_path}")
     save_posts_to_markdown(posts_data, markdown_dir, image_dir)
+
+    # Copy original JSON file to RawJson subdirectory
+    raw_json_dir = os.path.join(markdown_dir, "RawJson")
+    if not os.path.exists(raw_json_dir):
+        os.makedirs(raw_json_dir)
+
+    json_filename = os.path.basename(json_path)
+    raw_json_path = os.path.join(raw_json_dir, json_filename)
+    shutil.copy2(json_path, raw_json_path)
+
     print(f"Markdown files saved to {markdown_dir}")
+    print(f"Original JSON file copied to {raw_json_path}")
