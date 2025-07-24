@@ -82,9 +82,42 @@ There will be three directories in the `data` directory after running the code:
 
 - The `analysis` directory contains the rate and concurrency analysis plots. Each plot is named `<timestamp>-rate_analysis.png` and `<timestamp>-concurrency_analysis.png`, where `timestamp` is the time when the data was collected (e.g., `2025-07-24-05-02-18`).
 
-## Notes
+## Rate Limit and Concurrency Analysis
 
-### To modify
+The `get_and_save_post_list` function enforces two types of limits to balance efficiency and avoid being blocked by the server:
+
+1. **Submission Rate Limit (Token Bucket Algorithm):**
+   - The number of requests that can be submitted per second is strictly controlled using a token bucket algorithm.
+   - The parameter `MAX_SUBMITTED_REQUESTS_PER_SECOND` (set in `config.py` or `config_private.py`) determines the maximum average number of requests that can be initiated per second.
+   - The token bucket ensures that even under high concurrency, the submission rate will not exceed this threshold. If the rate is exceeded, threads will wait until tokens become available.
+   - Default: `MAX_SUBMITTED_REQUESTS_PER_SECOND = 10`.
+
+2. **Concurrency (Parallelism) Limit (Thread Pool):**
+   - The maximum number of requests that can be processed simultaneously is controlled by the thread pool size, set by `MAX_PARALLEL_REQUESTS`.
+   - This parameter determines how many threads can fetch posts and comments in parallel.
+   - Increasing this value allows more requests to be in progress at the same time, but may increase local resource usage and risk overloading the server.
+   - Default: `MAX_PARALLEL_REQUESTS = 10`.
+
+**How it works:**
+- Each thread in the pool must acquire a token from the token bucket before submitting a request. If no token is available, the thread waits, ensuring the submission rate never exceeds the configured limit.
+- The thread pool ensures that no more than `MAX_PARALLEL_REQUESTS` requests are being processed at any given time, regardless of the submission rate.
+
+**Tuning:**
+- You can adjust both parameters in your `config_private.py` (recommended for personal settings) or `config.py` (default).
+- Example:
+  ```python
+  MAX_SUBMITTED_REQUESTS_PER_SECOND = 10  # Submission rate limit (requests per second)
+  MAX_PARALLEL_REQUESTS = 10              # Maximum number of concurrent requests
+  ```
+- If you want to speed up data collection, you may increase these values. However, setting them too high may result in your requests being blocked by the server or overloading your local system.
+
+**Analysis and Monitoring:**
+- After each run, the code will print a detailed analysis of the actual submission rate and concurrency, and save time series plots in the `analysis` directory:
+  - `<timestamp>-rate_analysis.png`: Shows the real-time submission and completion rates.
+  - `<timestamp>-concurrency_analysis.png`: Shows the number of active threads over time.
+- Use these plots to monitor the effect of your settings and avoid exceeding safe limits.
+
+## To modify
 
 You can also use this project to get a single post or a list of posts, but you'll have to manually modify the `crawler.py` file.
 
@@ -93,25 +126,6 @@ The `get_one_post_and_all_comments` function is used to get a single post and al
 The `get_and_save_post_list` function is used to get a list of posts and save them to a JSON file and Markdown files.
 
 The `get_and_save_followed_posts` function is used to get your starred posts and save them to a JSON file and Markdown files.
-
-### Rate limit
-
-The `get_and_save_post_list` function enforces two types of limits to avoid being blocked by the server and to control resource usage:
-
-1. **Submission Rate Limit**: The number of requests that can be submitted per second is limited by the `MAX_SUBMITTED_REQUESTS_PER_SECOND` parameter (set in `config.py` or `config_private.py`). By default, this is set to 10 requests per second. If you want to fetch more posts per second, you can increase this value, but be aware that setting it too high may result in your requests being blocked by the server.
-
-2. **Concurrency (Parallelism) Limit**: The maximum number of requests that can be processed concurrently is controlled by the `MAX_PARALLEL_REQUESTS` parameter. This sets the size of the thread pool used for fetching posts and comments. Increasing this value allows more requests to be in progress at the same time, which can speed up data collection if your network and the server can handle it.
-
-Both parameters can be adjusted in your `config_private.py` (preferred for personal settings) or `config.py` (default). For example:
-
-```python
-MAX_SUBMITTED_REQUESTS_PER_SECOND = 10  # Submission rate limit (requests per second)
-MAX_PARALLEL_REQUESTS = 10             # Maximum number of concurrent requests
-```
-
-> [!NOTE]
-> If you increase these values, monitor the rate and concurrency analysis plots generated in the `analysis` directory to ensure you are not overloading your system or being rate-limited by the server.
-> The code will print analysis and save plots after each run to help you tune these parameters for optimal performance.
 
 ## Acknowledgments
 
