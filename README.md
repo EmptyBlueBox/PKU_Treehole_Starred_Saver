@@ -62,10 +62,15 @@ There will be three directories in the `Data` directory after running the code:
 │   │   └── 2025-07-24-05-03-51.json
 │   └── PostMarkdown
 │       ├── 2025-07-24-05-02-18
+│       │   ├── Image
+│       │   │   └── 1500000.gif
+│       │   │   └── 7508259.jpeg
 │       │   ├── 1500000.md
 │       │   ├── 7508259.md
 │       │   └── 7541521.md
 │       └── 2025-07-24-05-03-51
+│           ├── Image
+│           │   └── 7508259.jpeg
 │           └── 7508259.md
 ├── crawler.py
 ├── pyproject.toml
@@ -78,7 +83,7 @@ There will be three directories in the `Data` directory after running the code:
 
 - The `PostJson` directory stores the raw data for each data collection session. Each file is named `<timestamp>.json`, where `timestamp` is the time when the data was collected (e.g., `2025-07-24-05-02-18.json`). Each JSON file contains a list of posts and their associated comments retrieved in that session.
 
-- The `PostMarkdown` directory organizes the Markdown files generated for each post. For every data collection session, a subdirectory named after the corresponding JSON file is created. Inside each subdirectory, individual Markdown files are named `<pid>.md` (with zero-padded post IDs). Each Markdown file includes the post content, timestamp, all comments, and embeds image links (in absolute paths) pointing to the `Image` directory. If a comment quotes another, the quoted content is included for clarity.
+- The `PostMarkdown` directory organizes the Markdown files generated for each post. For every data collection session, a subdirectory named after the corresponding JSON file is created. Inside each subdirectory, individual Markdown files are named `<pid>.md` (with zero-padded post IDs). Each Markdown file includes the post content, timestamp, all comments, and embeds image links (in relative paths to the `Image` directory) . If a comment quotes another, the quoted content is included for clarity.
 
 - The `Analysis` directory contains the rate and concurrency analysis plots. Each plot is named `<timestamp>-rate_analysis.png` and `<timestamp>-concurrency_analysis.png`, where `timestamp` is the time when the data was collected (e.g., `2025-07-24-05-02-18`).
 
