@@ -4,6 +4,8 @@
 
 This project is for saving your starred posts in PKU Treehole, including posts, images and comments, and saves the data in original JSON and Markdown formats (with image links and quote links) for easy viewing.
 
+<img src="https://cdn.lyt0112.com/2025/07/6092978a49dd15bb33cb3be74fb571b6.png" alt="" style="width: 80%; height: auto; display: block; margin: 0 auto;" /><p style="text-align: center; font-style: italic; color: gray;"> The output markdown file of a post </p>
+
 > [!NOTE]
 > This project is not affiliated with Peking University nor the Peking University Youth Research Center.
 
