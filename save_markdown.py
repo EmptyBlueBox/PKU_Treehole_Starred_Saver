@@ -35,24 +35,38 @@ def format_time(t):
     return "unknown"
 
 
-def save_posts_to_markdown(posts_data, markdown_dir, image_dir):
+def save_posts_to_markdown(posts_data, markdown_dir, image_dir, json_source_path=None):
     """
     Save a list of posts (with comments) to Markdown files, one per post.
-    For posts with images, copy the image to markdown_dir/Image/ and use relative path in Markdown.
+    For posts with images, reference the image from shared storage but don't copy yet.
 
     Args:
         posts_data (list of dict): Each dict must have keys 'post' (dict) and 'comments' (list of dict).
         markdown_dir (str): Directory to save Markdown files.
-        image_dir (str): Directory where images are stored. Used as source for images.
+        image_dir (str): Directory where images are stored (shared storage).
+        json_source_path (str, optional): Path to the original JSON file to copy to RawJson folder.
 
     Returns:
         None
     """
     if not os.path.exists(markdown_dir):
         os.makedirs(markdown_dir)
-    image_target_dir = os.path.join(markdown_dir, "Image")
-    if not os.path.exists(image_target_dir):
-        os.makedirs(image_target_dir)
+
+    # Create RawJson directory and copy original JSON file if provided
+    raw_json_dir = os.path.join(markdown_dir, "RawJson")
+    if not os.path.exists(raw_json_dir):
+        os.makedirs(raw_json_dir)
+
+    # Copy the original JSON file to RawJson directory if provided
+    if json_source_path and os.path.exists(json_source_path):
+        json_filename = os.path.basename(json_source_path)
+        raw_json_path = os.path.join(raw_json_dir, json_filename)
+        shutil.copy2(json_source_path, raw_json_path)
+        print(f"[SAVE] Copied JSON to RawJson: {json_filename}")
+
+    # Track images that will be needed for final packaging
+    used_images = set()
+
     for item in posts_data:
         post = item["post"]
         comments = item["comments"]
@@ -68,16 +82,22 @@ def save_posts_to_markdown(posts_data, markdown_dir, image_dir):
         post_text = post.get("text", "")
         post_text_with_double_newlines = post_text.replace("\n", "\n")
         md_lines.append(post_text_with_double_newlines)
-        # If image, copy image and add image reference with relative path
+
+        # If image, add image reference with relative path (don't copy yet)
         if post.get("type") == "image" and post.get("image_filename"):
             image_filename = post["image_filename"]
-            src_image_path = os.path.join(image_dir, image_filename)
-            dst_image_path = os.path.join(image_target_dir, image_filename)
-            # Copy image if not already present
-            if os.path.exists(src_image_path) and not os.path.exists(dst_image_path):
-                shutil.copy2(src_image_path, dst_image_path)
-            # Use relative path in markdown
-            md_lines.append(f"\n![](./Image/{image_filename})")
+            used_images.add(image_filename)
+
+            # Verify image exists in shared storage
+            shared_image_path = os.path.join(image_dir, image_filename)
+            if os.path.exists(shared_image_path):
+                # Use relative path in markdown (will be correct after final packaging)
+                md_lines.append(f"\n![](./Image/{image_filename})")
+                print(f"[MARKDOWN] Referenced image: {image_filename}")
+            else:
+                print(f"[WARNING] Image not found in shared storage: {image_filename}")
+                md_lines.append(f"\n![Image not found: {image_filename}]")
+
         md_lines.append("\n## Comments\n")
         if comments:
             for c in comments:
@@ -93,10 +113,14 @@ def save_posts_to_markdown(posts_data, markdown_dir, image_dir):
                 md_lines.append("\n---\n")
         else:
             md_lines.append("No comments.")
+
         md_content = "\n".join(md_lines)
         md_filename = os.path.join(markdown_dir, f"{padded_pid}.md")
         with open(md_filename, "w", encoding="utf-8") as f:
             f.write(md_content)
+
+    print(f"[SAVE] Generated {len(posts_data)} markdown files")
+    print(f"[SAVE] Used images: {len(used_images)} files")
 
 
 def find_latest_json(json_dir):
@@ -141,12 +165,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     json_path = args.json
-    markdown_dir = os.path.join(
-        current_dir,
-        "Data",
-        "PostMarkdown",
-        os.path.splitext(os.path.basename(json_path))[0],
-    )
+    if json_path:
+        timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        markdown_dir = os.path.join(
+            current_dir,
+            "Data",
+            "PostMarkdown",
+            timestamp,
+        )
+    else:
+        print("No JSON file specified and no default found.")
+        exit(1)
 
     if not json_path or not os.path.exists(json_path):
         print("JSON file not found.")
@@ -155,16 +184,7 @@ if __name__ == "__main__":
         posts_data = json.load(f)
 
     print(f"Loaded {len(posts_data)} posts from {json_path}")
-    save_posts_to_markdown(posts_data, markdown_dir, image_dir)
-
-    # Copy original JSON file to RawJson subdirectory
-    raw_json_dir = os.path.join(markdown_dir, "RawJson")
-    if not os.path.exists(raw_json_dir):
-        os.makedirs(raw_json_dir)
-
-    json_filename = os.path.basename(json_path)
-    raw_json_path = os.path.join(raw_json_dir, json_filename)
-    shutil.copy2(json_path, raw_json_path)
+    save_posts_to_markdown(posts_data, markdown_dir, image_dir, json_path)
 
     print(f"Markdown files saved to {markdown_dir}")
-    print(f"Original JSON file copied to {raw_json_path}")
+    print(f"Original JSON file copied to {os.path.join(markdown_dir, 'RawJson')}")

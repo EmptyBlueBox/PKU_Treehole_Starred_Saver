@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKU Treehole Favorites Crawler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .status-message {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e1e1e1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .queue-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .queue-info h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .verification-form {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .verification-form h4 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6c3;
+            color: #155724;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PKU Treehole Favorites Crawler</h1>
+            <p>Enter your PKU Unified Authentication username and password to start fetching your favorite posts.</p>
+        </div>
+        
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="form-group">
+                <label for="username">Student ID/Username:</label>
+                <input type="text" id="username" placeholder="Please enter your student ID" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Please enter your password" required>
+            </div>
+            
+            <button class="btn" onclick="startCrawling()">Start Crawling</button>
+        </div>
+        
+        <!-- Verification Code Form -->
+        <div id="verificationForm" class="verification-form hidden">
+            <h4>Mobile Verification Required</h4>
+            <p>A verification code has been sent to your mobile phone. Please enter the code you received:</p>
+            <div class="form-group">
+                <label for="verificationCode">Verification Code:</label>
+                <input type="text" id="verificationCode" placeholder="Please enter the verification code" required>
+            </div>
+            <button class="btn" onclick="verifyCode()">Submit Code</button>
+        </div>
+        
+        <!-- Status Display -->
+        <div id="statusCard" class="status-card hidden">
+            <div class="status-title">Task Status</div>
+            <div id="statusMessage" class="status-message"></div>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="progressText" style="text-align: center; font-size: 12px; color: #666;"></div>
+            
+            <!-- Queue Info -->
+            <div id="queueInfo" class="queue-info hidden">
+                <h4>Queue Information</h4>
+                <p id="queueDetails"></p>
+            </div>
+            
+            <!-- Return to Home Button -->
+            <button class="btn" onclick="returnToHome()" style="background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); margin-top: 15px;">Return to Home</button>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="errorMessage" class="error hidden"></div>
+        
+        <!-- Success Message -->
+        <div id="successMessage" class="success hidden"></div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        let currentTaskId = null;
+        let statusInterval = null;
+        
+        function showElement(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        
+        function hideElement(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            showElement('errorMessage');
+            setTimeout(() => hideElement('errorMessage'), 5000);
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            showElement('successMessage');
+            setTimeout(() => hideElement('successMessage'), 5000);
+        }
+        
+        async function startCrawling() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showError('Please enter your username and password');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentTaskId = data.task_id;
+                    hideElement('loginForm');
+                    showElement('statusCard');
+                    startStatusPolling();
+                    showSuccess('Task created, processing started...');
+                } else {
+                    showError(data.message || 'Login failed');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+        
+        async function verifyCode() {
+            const verificationCode = document.getElementById('verificationCode').value;
+            
+            if (!verificationCode) {
+                showError('Please enter the verification code');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        task_id: currentTaskId, 
+                        verification_code: verificationCode 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    hideElement('verificationForm');
+                    showSuccess('Verification successful, continuing crawling...');
+                } else {
+                    showError(data.message || 'Verification failed');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            }
+        }
+        
+        async function updateStatus() {
+            if (!currentTaskId) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/crawl/status/${currentTaskId}`);
+                const status = await response.json();
+                
+                // Update status message
+                document.getElementById('statusMessage').textContent = status.message;
+                
+                // Update progress bar
+                const progressFill = document.getElementById('progressFill');
+                const progressText = document.getElementById('progressText');
+                progressFill.style.width = status.progress + '%';
+                
+                // Parse progress info from message, show as completed/total instead of percent
+                let progressDisplayText = '';
+                const message = status.message;
+                
+                // Try to parse "Completed X/Y posts" from message
+                const progressMatch = message.match(/Completed\s*(\d+)\/(\d+)\s*posts/);
+                const zhProgressMatch = message.match(/已完成\s*(\d+)\/(\d+)\s*个帖子/);
+                if (progressMatch) {
+                    const completed = progressMatch[1];
+                    const total = progressMatch[2];
+                    progressDisplayText = `${completed}/${total} posts`;
+                } else if (zhProgressMatch) {
+                    const completed = zhProgressMatch[1];
+                    const total = zhProgressMatch[2];
+                    progressDisplayText = `${completed}/${total} posts`;
+                } else {
+                    // If cannot parse, show percent
+                    progressDisplayText = `${status.progress.toFixed(1)}%`;
+                }
+                
+                progressText.textContent = progressDisplayText;
+                
+                // Update estimated time remaining
+                if (status.estimated_time_remaining) {
+                    const minutes = Math.floor(status.estimated_time_remaining / 60);
+                    const seconds = status.estimated_time_remaining % 60;
+                    progressText.textContent += ` (Estimated remaining: ${minutes}m ${seconds}s)`;
+                }
+                
+                // Handle different statuses
+                if (status.status === 'awaiting_verification') {
+                    showElement('verificationForm');
+                    hideElement('queueInfo');
+                } else if (status.status === 'pending' && status.queue_position) {
+                    hideElement('verificationForm');
+                    showElement('queueInfo');
+                    document.getElementById('queueDetails').textContent = 
+                        `Current queue position: ${status.queue_position}`;
+                    
+                    // Show queue status
+                    updateQueueStatus();
+                } else if (status.status === 'completed') {
+                    hideElement('verificationForm');
+                    hideElement('queueInfo');
+                    if (statusInterval) {
+                        clearInterval(statusInterval);
+                    }
+                    
+                    // Show download button
+                    if (status.download_url) {
+                        const downloadBtn = document.createElement('a');
+                        downloadBtn.href = API_BASE + status.download_url;
+                        downloadBtn.className = 'btn download-btn';
+                        downloadBtn.textContent = 'Download Result';
+                        downloadBtn.download = true;
+                        document.getElementById('statusCard').appendChild(downloadBtn);
+                    }
+                    
+                    showSuccess('Crawling completed!');
+                } else if (status.status === 'failed') {
+                    hideElement('verificationForm');
+                    hideElement('queueInfo');
+                    if (statusInterval) {
+                        clearInterval(statusInterval);
+                    }
+                    showError('Crawling failed: ' + status.message);
+                } else {
+                    hideElement('verificationForm');
+                    hideElement('queueInfo');
+                }
+                
+            } catch (error) {
+                console.error('Status update error:', error);
+            }
+        }
+        
+        async function updateQueueStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/queue/status`);
+                const queueStatus = await response.json();
+                
+                const queueDetails = document.getElementById('queueDetails');
+                const currentText = queueDetails.textContent;
+                queueDetails.textContent = currentText + 
+                    ` | Active tasks: ${queueStatus.active_tasks}/${queueStatus.max_concurrent}` +
+                    ` | Queued tasks: ${queueStatus.queued_tasks}`;
+                    
+            } catch (error) {
+                console.error('Queue status update error:', error);
+            }
+        }
+        
+        function startStatusPolling() {
+            // Update once immediately
+            updateStatus();
+            // Update every 3 seconds
+            statusInterval = setInterval(updateStatus, 3000);
+        }
+        
+        function returnToHome() {
+            // Stop status polling
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+            
+            // Reset task ID
+            currentTaskId = null;
+            
+            // Clear form
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('verificationCode').value = '';
+            
+            // Reset display state
+            hideElement('statusCard');
+            hideElement('verificationForm');
+            hideElement('errorMessage');
+            hideElement('successMessage');
+            hideElement('queueInfo');
+            showElement('loginForm');
+            
+            // Reset progress bar
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = '';
+            document.getElementById('statusMessage').textContent = '';
+            
+            // Remove possible download button
+            const existingDownloadBtn = document.querySelector('.download-btn');
+            if (existingDownloadBtn) {
+                existingDownloadBtn.remove();
+            }
+        }
+        
+        // On page load, check if there is an ongoing task
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/api/tasks`);
+                const tasks = await response.json();
+                
+                // Find the latest active task
+                const activeTasks = tasks.filter(t => 
+                    ['pending', 'authenticating', 'crawling', 'awaiting_verification'].includes(t.status)
+                );
+                
+                if (activeTasks.length > 0) {
+                    const latestTask = activeTasks[activeTasks.length - 1];
+                    currentTaskId = latestTask.task_id;
+                    hideElement('loginForm');
+                    showElement('statusCard');
+                    startStatusPolling();
+                }
+            } catch (error) {
+                console.error('Error checking active tasks:', error);
+            }
+        });
+    </script>
+</body>
+</html> 
