@@ -105,7 +105,9 @@ class App:
                 padded_pid = str(post_id).zfill(7)
                 image_filename = f"{padded_pid}.{image_type}"
                 image_path = os.path.join(self.image_dir, image_filename)
-                self.client.get_image(post_id, image_path)
+                # Only download if the image does not already exist
+                if not os.path.exists(image_path):
+                    self.client.get_image(post_id, image_path)
                 post["image_filename"] = image_filename  # Add for markdown reference
             comments = self.client.get_comment(post_id)["data"]
 
@@ -140,7 +142,9 @@ class App:
         """
         import threading
 
-        posts = list(set(posts))  # Deduplication, to avoid repeatedly crawling the same post
+        posts = list(
+            set(posts)
+        )  # Deduplication, to avoid repeatedly crawling the same post
         posts_data = []
         # For rate analysis
         submit_timestamps = []  # When each request is submitted
