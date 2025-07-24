@@ -40,13 +40,13 @@ class App:
         self.executor = ThreadPoolExecutor(max_workers=20)
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
         # Ensure required directories exist
-        self.data_dir = os.path.join(self.current_dir, "data")
+        self.data_dir = os.path.join(self.current_dir, "Data")
         self.analysis_dir = os.path.join(
-            self.current_dir, "analysis"
+            self.current_dir, "Analysis"
         )  # New: analysis dir parallel to data
-        self.image_dir = os.path.join(self.data_dir, "image")
-        self.post_json_dir = os.path.join(self.data_dir, "post_json")
-        self.post_markdown_dir = os.path.join(self.data_dir, "post_markdown")
+        self.image_dir = os.path.join(self.data_dir, "Image")
+        self.post_json_dir = os.path.join(self.data_dir, "PostJson")
+        self.post_markdown_dir = os.path.join(self.data_dir, "PostMarkdown")
         for d in [
             self.image_dir,
             self.post_json_dir,
@@ -285,7 +285,7 @@ class App:
         data_name = (
             os.path.join(
                 self.post_json_dir,
-                datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"),
+                datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S"),
             )
             + ".json"
         )
