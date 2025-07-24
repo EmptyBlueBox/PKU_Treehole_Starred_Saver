@@ -13,40 +13,6 @@ try:
 except ImportError:
     from config import PASSWORD, USERNAME
 
-
-def format_time(t):
-    """
-    Convert a timestamp or string to a human-readable time string.
-
-    Args:
-        t (int|float|str): Timestamp (seconds) or time string.
-
-    Returns:
-        str: Formatted time string 'YYYY-MM-DD HH:MM:SS' or 'unknown'.
-    """
-    if t is None:
-        return "unknown"
-    if isinstance(t, (int, float)):
-        try:
-            return datetime.datetime.fromtimestamp(t).strftime("%Y-%m-%d %H:%M:%S")
-        except Exception:
-            return "unknown"
-    if isinstance(t, str):
-        # Try to parse string to datetime, else return as is
-        try:
-            # Try common formats
-            for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y/%m/%d %H:%M:%S"):
-                try:
-                    dt = datetime.datetime.strptime(t, fmt)
-                    return dt.strftime("%Y-%m-%d %H:%M:%S")
-                except Exception:
-                    continue
-            return t
-        except Exception:
-            return "unknown"
-    return "unknown"
-
-
 class App:
     """
     Main application class for crawling and saving PKU Treehole posts and comments.
@@ -175,47 +141,6 @@ class App:
         )
         with open(data_name, "w", encoding="utf-8") as file:
             json.dump(posts_data, file, indent=4, ensure_ascii=False)
-        # Save each post as a Markdown file
-        for item in posts_data:
-            post = item["post"]
-            comments = item["comments"]
-            pid = post.get("pid", "unknown")
-            padded_pid = (
-                str(pid).zfill(7)
-                if isinstance(pid, int) or (isinstance(pid, str) and pid.isdigit())
-                else pid
-            )
-            post_time = format_time(post.get("timestamp"))
-            md_lines = [f"# Post {pid}\n"]
-            md_lines.append(f"[{post_time}]\n")
-            # Duplicate every newline in the post text to ensure Markdown renders blank lines (i.e., visible line breaks).
-            post_text = post.get("text", "")
-            post_text_with_double_newlines = post_text.replace("\n", "\n")
-            md_lines.append(post_text_with_double_newlines)
-            # If image, add image reference
-            if post.get("type") == "image" and post.get("image_filename"):
-                # Use relative path from markdown to image folder
-                image_rel_path = f"../image/{post['image_filename']}"
-                md_lines.append(f"\n![]({image_rel_path})")
-            md_lines.append("\n## Comments\n")
-            if comments:
-                for c in comments:
-                    name = c.get("name", "Anonymous")
-                    text = c.get("text", "")
-                    c_time = format_time(c.get("timestamp"))
-                    quote = c.get("quote")
-                    if quote:
-                        quote_name = quote.get("name_tag", "Anonymous")
-                        quote_text = quote.get("text", "")
-                        md_lines.append(f"> {quote_name}: {quote_text}\n")
-                    md_lines.append(f"{name} [{c_time}]: {text}")
-                    md_lines.append("\n---\n")
-            else:
-                md_lines.append("No comments.")
-            md_content = "\n".join(md_lines)
-            md_filename = os.path.join(self.post_markdown_dir, f"{padded_pid}.md")
-            with open(md_filename, "w", encoding="utf-8") as f:
-                f.write(md_content)
 
     def get_and_save_followed_posts(self):
         """
@@ -237,6 +162,5 @@ class App:
 
 
 if __name__ == "__main__":
-    # Example usage: fetch and save several posts by ID
     app = App()
     app.get_and_save_followed_posts()
