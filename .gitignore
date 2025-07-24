@@ -9,3 +9,4 @@ config_private.py
 
 # Data
 data/
+analysis/
