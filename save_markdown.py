@@ -1,6 +1,7 @@
 import os
 import datetime
 import json
+import shutil
 
 
 def format_time(t):
@@ -37,25 +38,29 @@ def format_time(t):
 def save_posts_to_markdown(posts_data, markdown_dir, image_dir):
     """
     Save a list of posts (with comments) to Markdown files, one per post.
+    For posts with images, copy the image to markdown_dir/Image/ and use relative path in Markdown.
 
     Args:
         posts_data (list of dict): Each dict must have keys 'post' (dict) and 'comments' (list of dict).
         markdown_dir (str): Directory to save Markdown files.
-        image_dir (str): Directory where images are stored. Used for absolute image paths.
+        image_dir (str): Directory where images are stored. Used as source for images.
 
     Returns:
         None
     """
     if not os.path.exists(markdown_dir):
         os.makedirs(markdown_dir)
+    image_target_dir = os.path.join(markdown_dir, "Image")
+    if not os.path.exists(image_target_dir):
+        os.makedirs(image_target_dir)
     for item in posts_data:
         post = item["post"]
         comments = item["comments"]
         pid = post.get("pid", "unknown")
         padded_pid = (
             str(pid).zfill(7)
-            if isinstance(pid, int) or (isinstance(pid, str) and pid.isdigit())
-            else pid
+            if isinstance(pid, int) or (isinstance(pid, str) and str(pid).isdigit())
+            else str(pid)
         )
         post_time = format_time(post.get("timestamp"))
         md_lines = [f"# Post {pid}\n"]
@@ -63,12 +68,16 @@ def save_posts_to_markdown(posts_data, markdown_dir, image_dir):
         post_text = post.get("text", "")
         post_text_with_double_newlines = post_text.replace("\n", "\n")
         md_lines.append(post_text_with_double_newlines)
-        # If image, add image reference with absolute path
+        # If image, copy image and add image reference with relative path
         if post.get("type") == "image" and post.get("image_filename"):
-            image_abs_path = os.path.abspath(
-                os.path.join(image_dir, post["image_filename"])
-            )
-            md_lines.append(f"\n![]({image_abs_path})")
+            image_filename = post["image_filename"]
+            src_image_path = os.path.join(image_dir, image_filename)
+            dst_image_path = os.path.join(image_target_dir, image_filename)
+            # Copy image if not already present
+            if os.path.exists(src_image_path) and not os.path.exists(dst_image_path):
+                shutil.copy2(src_image_path, dst_image_path)
+            # Use relative path in markdown
+            md_lines.append(f"\n![](./Image/{image_filename})")
         md_lines.append("\n## Comments\n")
         if comments:
             for c in comments:
