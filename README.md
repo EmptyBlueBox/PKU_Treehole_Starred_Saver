@@ -65,14 +65,18 @@ There will be three directories in the `Data` directory after running the code:
 │   └── PostMarkdown
 │       ├── 2025-07-24-05-02-18
 │       │   ├── Image
-│       │   │   └── 1500000.gif
+│       │   │   ├── 1500000.gif
 │       │   │   └── 7508259.jpeg
+│       │   ├── RawJson
+│       │   │   └── 2025-07-24-05-02-18.json
 │       │   ├── 1500000.md
 │       │   ├── 7508259.md
 │       │   └── 7541521.md
 │       └── 2025-07-24-05-03-51
 │           ├── Image
 │           │   └── 7508259.jpeg
+│           ├── RawJson
+│           │   └── 2025-07-24-05-03-51.json
 │           └── 7508259.md
 ├── crawler.py
 ├── pyproject.toml
