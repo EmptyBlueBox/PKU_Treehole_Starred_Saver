@@ -9,4 +9,5 @@ config_private.py
 
 # Data
 Data/
+TaskData/
 Analysis/
