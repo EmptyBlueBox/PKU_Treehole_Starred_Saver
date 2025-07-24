@@ -24,7 +24,7 @@ from client import Client
 from save_markdown import save_posts_to_markdown
 
 # Configuration
-MAX_CONCURRENT_TASKS = 3  # Maximum number of concurrent crawling tasks
+MAX_CONCURRENT_TASKS = 2  # Maximum number of concurrent crawling tasks
 TASK_TIMEOUT = 3600  # Task timeout in seconds (1 hour)
 
 # Global state management
@@ -344,7 +344,7 @@ class TaskCrawlerApp:
             list: Posts data
         """
         posts = list(set(posts))
-        posts = posts[:10]  # 测试用
+        # posts = posts[:10]
 
         total_posts = len(posts)
         completed_posts = 0

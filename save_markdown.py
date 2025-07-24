@@ -79,7 +79,7 @@ def save_posts_to_markdown(posts_data, markdown_dir, image_dir, json_source_path
         post_time = format_time(post.get("timestamp"))
         md_lines = [f"# Post {pid}\n"]
         md_lines.append(f"[{post_time}]\n")
-        post_text = post.get("text", "")
+        post_text = post.get("text", "") or ""
         post_text_with_double_newlines = post_text.replace("\n", "\n")
         md_lines.append(post_text_with_double_newlines)
 
@@ -101,13 +101,13 @@ def save_posts_to_markdown(posts_data, markdown_dir, image_dir, json_source_path
         md_lines.append("\n## Comments\n")
         if comments:
             for c in comments:
-                name = c.get("name", "Anonymous")
-                text = c.get("text", "")
+                name = c.get("name", "Anonymous") or "Anonymous"
+                text = c.get("text", "") or ""
                 c_time = format_time(c.get("timestamp"))
                 quote = c.get("quote")
                 if quote:
-                    quote_name = quote.get("name_tag", "Anonymous")
-                    quote_text = quote.get("text", "")
+                    quote_name = quote.get("name_tag", "Anonymous") or "Anonymous"
+                    quote_text = quote.get("text", "") or ""
                     md_lines.append(f"> {quote_name}: {quote_text}\n")
                 md_lines.append(f"{name} [{c_time}]: {text}")
                 md_lines.append("\n---\n")
