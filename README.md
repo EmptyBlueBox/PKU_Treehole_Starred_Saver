@@ -6,7 +6,7 @@ This project is for saving your starred posts in PKU Treehole, including posts, 
 
 ![The output markdown file of a post](https://cdn.lyt0112.com/2025/07/95d65ac40a0890406bc99f9cf87d5c3e.png)
 
-*The output markdown file of a post*
+<small>*The output markdown file of a post*</small>
 
 ![Quote in the markdown file](https://cdn.lyt0112.com/2025/07/a6c4b036100c206cfe90abf1aef4096a.png)
 
