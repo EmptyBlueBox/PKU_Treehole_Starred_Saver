@@ -4,11 +4,11 @@
 
 This project is for saving your starred posts in PKU Treehole, including posts, images and comments, and saves the data in original JSON and Markdown formats (with image links and quote links) for easy viewing.
 
-<img src="https://cdn.lyt0112.com/2025/07/95d65ac40a0890406bc99f9cf87d5c3e.png" alt="The output markdown file of a post" width="80%" />
+![The output markdown file of a post](https://cdn.lyt0112.com/2025/07/95d65ac40a0890406bc99f9cf87d5c3e.png)
 
 *The output markdown file of a post*
 
-<img src="https://cdn.lyt0112.com/2025/07/a6c4b036100c206cfe90abf1aef4096a.png" alt="Quote in the markdown file" width="80%" />
+![Quote in the markdown file](https://cdn.lyt0112.com/2025/07/a6c4b036100c206cfe90abf1aef4096a.png)
 
 *Quote in the markdown file*
 
@@ -117,11 +117,11 @@ The `get_and_save_post_list` function enforces two types of limits to balance ef
    - Increasing this value allows more requests to be in progress at the same time, but may increase local resource usage and risk overloading the server.
    - Default: `MAX_PARALLEL_REQUESTS = 10`.
 
-<img src="Image/rate_analysis.png" alt="Rate Analysis" width="80%" />
+![Rate Analysis](Image/rate_analysis.png)
 
 *Rate analysis showing real-time submission and completion rates*
 
-<img src="Image/concurrency_analysis.png" alt="Concurrency Analysis" width="80%" />
+![Concurrency Analysis](Image/concurrency_analysis.png)
 
 *Concurrency analysis showing the number of active threads over time*
 
