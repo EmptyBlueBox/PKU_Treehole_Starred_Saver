@@ -77,7 +77,7 @@ class App:
         while not response.json()["success"]:
             if response.json()["message"] == "请手机短信验证":
                 tmp = input("Send verification code (Y/n): ")
-                if tmp == "Y":
+                if tmp == "Y" or tmp == "y":
                     self.client.send_message()
                     code = input("SMS verification code: ")
                     self.client.login_by_message(code)

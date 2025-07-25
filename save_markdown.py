@@ -71,6 +71,8 @@ def save_posts_to_markdown(posts_data, markdown_dir, image_dir):
             f"Star: {star_count}    Reply: {reply_count}\n"
         )  # Add star and reply count
         post_text = post.get("text", "")
+        if post_text is None:
+            continue
         post_text_with_double_newlines = post_text.replace("\n", "\n")
         md_lines.append(post_text_with_double_newlines)
         # If image, copy image and add image reference with relative path
