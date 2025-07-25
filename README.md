@@ -1,4 +1,91 @@
-# PKU Treehole Starred Saver
+# PKU Treehole Starred Saver Backend
+
+This is the backend of the PKU Treehole Starred Saver project.
+
+To start the api server, run:
+
+```bash
+python start_server.py --host 0.0.0.0 --port 8000
+```
+
+To test the service on your local machine, run:
+
+```bash
+python start_server.py --host localhost --port 8000
+```
+
+## API Documentation
+
+### Authentication & Task Management
+
+| Method | Endpoint                      | Request Body / Params                          | Response Body / Description                                                                                                                                   |
+| ------ | ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/auth/login`             | `{ "username": str, "password": str }`         | `{ success, task_id, message, status }`<br>Start a new crawling task (login and crawl). Returns a unique `task_id`. If the queue is full, the task is queued. |
+| POST   | `/api/auth/verify`            | `{ "task_id": str, "verification_code": str }` | `{ success, message, task_id }`<br>Submit SMS verification code if required. Continues the crawling process.                                                  |
+| GET    | `/api/crawl/status/{task_id}` | Path: `task_id`                                | `TaskStatus` object (see below). Returns the current status and progress of the task.                                                                         |
+| GET    | `/api/queue/status`           | None                                           | `QueueStatus` object (see below). Returns the number of active and queued tasks.                                                                              |
+| GET    | `/api/download/{task_id}`     | Path: `task_id`                                | Returns a zip file (application/zip) with the results for the completed task.                                                                                 |
+| GET    | `/api/tasks`                  | None                                           | List of `TaskStatus` objects for all tasks.                                                                                                                   |
+
+### Response Models
+
+- **TaskStatus**
+  ```json
+  {
+    "task_id": "string",
+    "status": "pending | authenticating | crawling | completed | failed | awaiting_verification",
+    "progress": 0.0,
+    "estimated_time_remaining": 123, // (optional, seconds)
+    "message": "string",
+    "queue_position": 1, // (optional, if queued)
+    "download_url": "/api/download/{task_id}" // (optional, if completed)
+  }
+  ```
+- **QueueStatus**
+  ```json
+  {
+    "active_tasks": 1,
+    "queued_tasks": 2,
+    "max_concurrent": 2
+  }
+  ```
+
+### Note on Progress Details
+
+- The total number of posts and the number of fetched posts are included in the `message` field as a string (e.g., `"已完成 X/Y 个帖子"`).
+- The frontend can parse these values from the `message` string to display a detailed progress bar.
+- For more robust and structured usage, it is recommended to return these values as independent fields (such as `total_posts` and `completed_posts`) in the API response in the future.
+
+
+### Typical Flow
+
+1. **Login:**
+   - `POST /api/auth/login` with username and password.
+   - If SMS verification is required, status will be `awaiting_verification`.
+2. **(If needed) Submit SMS Code:**
+   - `POST /api/auth/verify` with `task_id` and `verification_code`.
+3. **Check Status:**
+   - `GET /api/crawl/status/{task_id}` to poll for progress and download link.
+4. **Download Results:**
+   - When status is `completed`, download from `GET /api/download/{task_id}`.
+
+### Example: Start a Task
+
+```bash
+curl -X POST http://localhost:8000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username": "YOUR_ID", "password": "YOUR_PW"}'
+```
+
+### Example: Check Task Status
+```bash
+curl http://localhost:8000/api/crawl/status/{task_id}
+```
+
+### Example: Download Results
+```bash
+curl -O http://localhost:8000/api/download/{task_id}
+```
 
 ## Introduction
 
