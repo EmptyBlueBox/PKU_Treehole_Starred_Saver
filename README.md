@@ -6,11 +6,7 @@ This project is for saving your starred posts in PKU Treehole, including posts, 
 
 ![The output markdown file of a post](https://cdn.lyt0112.com/2025/07/95d65ac40a0890406bc99f9cf87d5c3e.png)
 
-<small>*The output markdown file of a post*</small>
-
 ![Quote in the markdown file](https://cdn.lyt0112.com/2025/07/a6c4b036100c206cfe90abf1aef4096a.png)
-
-*Quote in the markdown file*
 
 > [!NOTE]
 > This project is not affiliated with Peking University nor the Peking University Youth Research Center.
@@ -119,11 +115,7 @@ The `get_and_save_post_list` function enforces two types of limits to balance ef
 
 ![Rate Analysis](Image/rate_analysis.png)
 
-*Rate analysis showing real-time submission and completion rates*
-
 ![Concurrency Analysis](Image/concurrency_analysis.png)
-
-*Concurrency analysis showing the number of active threads over time*
 
 **How it works:**
 - Each thread in the pool must acquire a token from the token bucket before submitting a request. If no token is available, the thread waits, ensuring the submission rate never exceeds the configured limit.
