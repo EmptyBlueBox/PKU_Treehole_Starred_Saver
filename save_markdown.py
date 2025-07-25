@@ -77,8 +77,13 @@ def save_posts_to_markdown(posts_data, markdown_dir, image_dir, json_source_path
             else str(pid)
         )
         post_time = format_time(post.get("timestamp"))
+        star_count = post.get("likenum", "unknown")  # Number of stars (favorites)
+        reply_count = post.get("reply", "unknown")  # Number of replies
         md_lines = [f"# Post {pid}\n"]
         md_lines.append(f"[{post_time}]\n")
+        md_lines.append(
+            f"Star: {star_count}    Reply: {reply_count}\n"
+        )  # Add star and reply count
         post_text = post.get("text", "") or ""
         post_text_with_double_newlines = post_text.replace("\n", "\n")
         md_lines.append(post_text_with_double_newlines)
